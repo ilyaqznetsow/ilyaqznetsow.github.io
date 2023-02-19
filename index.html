@@ -1,33 +1,22 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <meta charset="UTF-8">
-    <title>Weather App</title>
-  </head>
-  <body>
+    <title>Score wallet</title>
+</head>
+
+<body>
+    <script src="./js/app.js"></script>
     <div>
-      <label for="address">Address:</label>
-      <input type="text" id="address" name="address">
-      <button onclick="checkAddress()">Submit</button>
+        <label for="address">Address:</label>
+        <input type="text" id="address" name="address">
+        <button onclick="checkAddress()">Submit</button>
     </div>
-    <ul id="weatherList"></ul>
-    
-    <script>
-      function checkAddress() {
-        const address = document.getElementById("address").value;
-        fetch(`https://api.openweathermap.org/data/2.5/weather?q=${address}&appid=<your_api_key>`)
-          .then(response => response.json())
-          .then(data => {
-            const weather = data.weather[0].main;
-            const weatherList = document.getElementById("weatherList");
-            const listItem = document.createElement("li");
-            listItem.innerText = `${address}: ${weather}`;
-            weatherList.appendChild(listItem);
-          })
-          .catch(error => {
-            console.error(error);
-          });
-      }
-    </script>
-  </body>
+    <div>
+        <label id="total_score"> </label>
+    </div>
+    <ul id="itemList"></ul>
+</body>
+
 </html>
