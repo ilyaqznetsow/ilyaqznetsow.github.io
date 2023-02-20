@@ -10,6 +10,8 @@ function checkAddress() {
 
             const itemList = document.getElementById("itemList");
 
+            itemList.innerHTML = '';
+
             var total_score = 0;
 
             for (let i = 0; i < grouped.length; i++) {
@@ -33,6 +35,12 @@ function checkAddress() {
             }
 
             const total_label = document.getElementById("total_score");
+
+            if(!total_score){
+                total_label.innerText = "you have no points yet";
+                return;
+            }
+
             total_label.innerText = "total: " + total_score;
 
         })
@@ -63,7 +71,7 @@ const whitelist = [
         //ton hack challenge
         address: "EQBk35zPnJJMoTsK41MEoIeiF-oR3UwuKytAzm-0XwRKsjl_",
         raw: "0:64df9ccf9c924ca13b0ae35304a087a217ea11dd4c2e2b2b40ce6fb45f044ab2",
-        score: 10,
+        score: 1,
     },
     {
         //STON.fi Soulbound
