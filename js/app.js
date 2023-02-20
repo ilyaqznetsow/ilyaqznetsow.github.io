@@ -1,5 +1,6 @@
 function checkAddress() {
     const address = document.getElementById("address").value;
+    fetchAddressData(address)
     fetch(`https://tonapi.io/v1/nft/searchItems?owner=${address}&include_on_sale=false&limit=1000&offset=0`)
         .then(response => response.json())
         .then(data => {
@@ -47,6 +48,22 @@ function checkAddress() {
         .catch(error => {
             console.error(error);
         });
+}
+
+function fetchAddressData(address){
+    fetch(`https://tonapi.io/v1/account/getInfo?account=${address}`)
+    .then(response => response.json())
+    .then(data => {
+        const accountName = document.getElementById("accountName");
+        if(!data){
+            return;
+        }
+
+        accountName.innerText = data.name + " 💎 " + data.balance / 1000000000;
+    })
+    .catch(error => {
+        console.error(error);
+    });
 }
 
 function groupBy(collection, property) {
