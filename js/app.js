@@ -1,17 +1,18 @@
 function checkAddress() {
     const address = document.getElementById("address").value;
-    fetchAddressData(address)
+
+    const itemList = document.getElementById("itemList");
+    itemList.innerHTML = '';
+
+    fetchAddressData(address);
+    fetchJettonData(address);
     fetch(`https://tonapi.io/v1/nft/searchItems?owner=${address}&include_on_sale=false&limit=1000&offset=0`)
         .then(response => response.json())
         .then(data => {
             const items = data.nft_items;
             const verified = items.filter(item => item.collection !== undefined);
 
-            var grouped = groupBy(verified, "collection_address");
-
-            const itemList = document.getElementById("itemList");
-
-            itemList.innerHTML = '';
+            var grouped = groupBy(verified, "collection_address");           
 
             var total_score = 0;
 
@@ -42,7 +43,7 @@ function checkAddress() {
                 return;
             }
 
-            total_label.innerText = "total: " + total_score;
+            total_label.innerText = "Score: " + total_score;
 
         })
         .catch(error => {
@@ -54,12 +55,47 @@ function fetchAddressData(address){
     fetch(`https://tonapi.io/v1/account/getInfo?account=${address}`)
     .then(response => response.json())
     .then(data => {
-        const accountName = document.getElementById("accountName");
+        const accountName = document.getElementById("account_name");
         if(!data){
             return;
         }
 
         accountName.innerText = data.name + " 💎 " + data.balance / 1000000000;
+    })
+    .catch(error => {
+        console.error(error);
+    });
+}
+
+function fetchJettonData(address){
+    fetch(`https://tonapi.io/v1/jetton/getBalances?account=${address}`)
+    .then(response => response.json())
+    .then(data => {
+        const balances = data.balances;//.filter(item => item.balance > 0);
+        if(!balances){
+            return;
+        }
+
+        const itemList = document.getElementById("itemList");
+
+        for (let i = 0; i < balances.length; i++) {
+            const jetton = balances[i];
+            if (jetton === undefined) {
+                continue;
+            }
+
+            // const score = whitelist.find(wl => wl.raw === jetton.metadata.address)?.score;
+
+            // if (!score) {
+            //     continue;
+            // }
+
+            // total_score += score;
+
+            const listItem = document.createElement("li");
+            listItem.innerText = `${jetton.metadata.name}: ${jetton.balance}`;
+            itemList.appendChild(listItem);
+        }
     })
     .catch(error => {
         console.error(error);
