@@ -6,49 +6,53 @@ function checkAddress() {
 
     fetchAddressData(address);
     fetchJettonData(address);
+    fetchNfts(address);
+}
+
+function fetchNfts(address){
     fetch(`https://tonapi.io/v1/nft/searchItems?owner=${address}&include_on_sale=false&limit=1000&offset=0`)
-        .then(response => response.json())
-        .then(data => {
-            const items = data.nft_items;
-            const verified = items.filter(item => item.collection !== undefined);
+    .then(response => response.json())
+    .then(data => {
+        const items = data.nft_items;
+        const verified = items.filter(item => item.collection !== undefined);
 
-            var grouped = groupBy(verified, "collection_address");           
+        var grouped = groupBy(verified, "collection_address");           
 
-            var total_score = 0;
+        var total_score = 0;
 
-            for (let i = 0; i < grouped.length; i++) {
-                const group = grouped[i];
-                const collection = group[0].collection;
-                if (collection === undefined) {
-                    continue;
-                }
-
-                const score = whitelist.find(wl => wl.raw === collection.address)?.score;
-
-                if (!score) {
-                    continue;
-                }
-
-                total_score += score;
-
-                const listItem = document.createElement("li");
-                listItem.innerText = `${collection.name}: ${group.length}, score: ${score}`;
-                itemList.appendChild(listItem);
+        for (let i = 0; i < grouped.length; i++) {
+            const group = grouped[i];
+            const collection = group[0].collection;
+            if (collection === undefined) {
+                continue;
             }
 
-            const total_label = document.getElementById("total_score");
+            const score = whitelist.find(wl => wl.raw === collection.address)?.score;
 
-            if(!total_score){
-                total_label.innerText = "you have no points yet";
-                return;
+            if (!score) {
+                continue;
             }
 
-            total_label.innerText = "Score: " + total_score;
+            total_score += score;
 
-        })
-        .catch(error => {
-            console.error(error);
-        });
+            const listItem = document.createElement("li");
+            listItem.innerText = `${collection.name}: ${group.length}, score: ${score}`;
+            itemList.appendChild(listItem);
+        }
+
+        const total_label = document.getElementById("total_score");
+
+        if(!total_score){
+            total_label.innerText = "you have no points yet";
+            return;
+        }
+
+        total_label.innerText = "Score: " + total_score;
+
+    })
+    .catch(error => {
+        console.error(error);
+    });
 }
 
 function fetchAddressData(address){
@@ -71,7 +75,7 @@ function fetchJettonData(address){
     fetch(`https://tonapi.io/v1/jetton/getBalances?account=${address}`)
     .then(response => response.json())
     .then(data => {
-        const balances = data.balances;//.filter(item => item.balance > 0);
+        const balances = data.balances.filter(item => item.balance > 0);
         if(!balances){
             return;
         }
@@ -80,9 +84,12 @@ function fetchJettonData(address){
 
         for (let i = 0; i < balances.length; i++) {
             const jetton = balances[i];
-            if (jetton === undefined) {
+           
+            if (jetton === undefined || jetton.metadata === undefined) {
                 continue;
             }
+
+            console.log(jetton.metadata.name);
 
             // const score = whitelist.find(wl => wl.raw === jetton.metadata.address)?.score;
 
@@ -93,7 +100,9 @@ function fetchJettonData(address){
             // total_score += score;
 
             const listItem = document.createElement("li");
-            listItem.innerText = `${jetton.metadata.name}: ${jetton.balance}`;
+            var balance = jetton.balance / Math.pow(10, jetton.metadata.decimals);
+
+            listItem.innerText = `${jetton.metadata.name}: ${balance}`;
             itemList.appendChild(listItem);
         }
     })
